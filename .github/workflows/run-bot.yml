@@ -1,8 +1,12 @@
+
 name: Nexus Daily Top 10 Holders
 
 on:
   schedule:
     - cron: '0 0 * * *'
+    - cron: '0 8 * * *'
+    - cron: '0 15 * * *'
+    - cron: '0 17 * * *'
   workflow_dispatch:
 
 jobs:
