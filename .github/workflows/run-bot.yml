@@ -25,5 +25,6 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: "-1003781115575"
           MINT_ADDRESS: "HUXEjHuMXQJKr3vjG4TTLH5FRuRdVJhUhQ8r3rPmpump"
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
           DECIMALS: "9"
         run: node bot.js
