@@ -1,0 +1,29 @@
+name: Nexus Daily Top 10 Holders
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Base
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node Dependencies
+        run: npm install
+
+      - name: Post Top 10 Holders
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: "-1003781115575"
+          MINT_ADDRESS: "HUXEjHuMXQJKr3vjG4TTLH5FRuRdVJhUhQ8r3rPmpump"
+          DECIMALS: "9"
+        run: node bot.js
