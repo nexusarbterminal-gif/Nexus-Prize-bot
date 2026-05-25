@@ -1,0 +1,30 @@
+name: Nexus Weekly Winner
+
+on:
+  schedule:
+    - cron: '0 0 * * 6'
+  workflow_dispatch:
+
+jobs:
+  winner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Post Weekly Winner
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: "-1003781115575"
+          MINT_ADDRESS: "HUXEjHuMXQJKr3vjG4TTLH5FRuRdVJhUhQ8r3rPmpump"
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+          DECIMALS: "9"
+        run: node contest.js
