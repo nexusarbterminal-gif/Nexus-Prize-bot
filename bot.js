@@ -6,7 +6,12 @@ const TG_CHAT_ID = process.env.TG_CHAT_ID;
 const MINT_ADDRESS = process.env.MINT_ADDRESS;
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const DECIMALS = parseInt(process.env.DECIMALS) || 9;
-const EXCLUDED = (process.env.EXCLUDED_ADDRESSES || '').split(',').map(a => a.trim()).filter(Boolean);
+const EXCLUDED = [
+  '6HyvWR8zPy8WUDGTnwFcgU4nJnRxz2qJThjJCifeRnNH',
+  'BxEabPd6tBB7WtNbVGNiDcB9Y8mosuJ8DaZcjvKeUwi6',
+  'FtNYWPGtt25xmabUkgVzzHvJ97QaMA1wTGtCQqMXpQ3B',
+  ...(process.env.EXCLUDED_ADDRESSES || '').split(',').map(a => a.trim()).filter(Boolean)
+];
 
 function getConnection() {
   if (HELIUS_API_KEY) {
