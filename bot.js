@@ -56,7 +56,7 @@ async function postTopHolders() {
         address: acc.address.toBase58(),
         amount: acc.uiAmount || (Number(acc.amount) / Math.pow(10, DECIMALS))
       }))
-      .filter(acc => acc.amount > 0 && !EXCLUDED.includes(acc.address))
+      .filter(acc => acc.amount >= 5000000 && !EXCLUDED.includes(acc.address))
       .slice(0, 10);
 
     const medals = ['🥇', '🥈', '🥉'];
