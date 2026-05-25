@@ -6,7 +6,25 @@ const TG_CHAT_ID = process.env.TG_CHAT_ID;
 const MINT_ADDRESS = process.env.MINT_ADDRESS;
 const DECIMALS = parseInt(process.env.DECIMALS) || 9;
 
-const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+const RPC_ENDPOINTS = [
+  "https://solana-rpc.publicnode.com",
+  "https://api.mainnet-beta.solana.com",
+  "https://rpc.extrnode.com",
+];
+
+async function getWorkingConnection() {
+  for (const endpoint of RPC_ENDPOINTS) {
+    try {
+      const conn = new Connection(endpoint, "confirmed");
+      await conn.getLatestBlockhash();
+      console.log(`Using RPC: ${endpoint}`);
+      return conn;
+    } catch {
+      console.log(`RPC failed, trying next: ${endpoint}`);
+    }
+  }
+  throw new Error("All RPC endpoints failed.");
+}
 
 async function postTopHolders() {
   if (!TG_BOT_TOKEN || !TG_CHAT_ID || !MINT_ADDRESS) {
@@ -17,6 +35,7 @@ async function postTopHolders() {
   try {
     console.log(`Fetching top holders for: ${MINT_ADDRESS}`);
 
+    const connection = await getWorkingConnection();
     const mintPubKey = new PublicKey(MINT_ADDRESS);
     const largestAccounts = await connection.getTokenLargestAccounts(mintPubKey);
 
