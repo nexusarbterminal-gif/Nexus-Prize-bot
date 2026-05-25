@@ -10,12 +10,12 @@ const connection = new Connection("https://api.mainnet-beta.solana.com", "confir
 
 async function postTopHolders() {
   if (!TG_BOT_TOKEN || !TG_CHAT_ID || !MINT_ADDRESS) {
-    console.error("❌ Missing required environment variables.");
+    console.error("Missing required environment variables.");
     process.exit(1);
   }
 
   try {
-    console.log(`📡 Fetching top holders for: ${MINT_ADDRESS}`);
+    console.log(`Fetching top holders for: ${MINT_ADDRESS}`);
 
     const mintPubKey = new PublicKey(MINT_ADDRESS);
     const largestAccounts = await connection.getTokenLargestAccounts(mintPubKey);
@@ -34,30 +34,37 @@ async function postTopHolders() {
       const rank = medals[i] || `${i + 1}.`;
       const addr = `${h.address.slice(0, 4)}...${h.address.slice(-4)}`;
       const bal = h.amount.toLocaleString();
-      return `${rank} \`${addr}\` — ${bal} NEXUS`;
+      return `${rank} <code>${addr}</code> — ${bal} NEXUS`;
     }).join('\n');
 
     const now = new Date().toLocaleDateString('en-US', { timeZone: 'America/Chicago', dateStyle: 'full' });
 
     const messageText =
-      `🏆 *NEXUS Daily Top 10 Holders* 🏆\n` +
-      `_${now}_\n\n` +
+      `🏆 <b>NEXUS Daily Top 10 Holders</b> 🏆\n` +
+      `<i>${now}</i>\n\n` +
       `${holderLines}\n\n` +
-      `_CA: \`${MINT_ADDRESS}\`_\n` +
+      `<i>CA: <code>${MINT_ADDRESS}</code></i>\n` +
       `#NEXUS #Solana #NexusTrade`;
 
-    console.log("✉️ Posting top 10 to Telegram...");
+    console.log("Posting top 10 to Telegram...");
 
-    await axios.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+    const response = await axios.post(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
       chat_id: TG_CHAT_ID,
       text: messageText,
-      parse_mode: 'Markdown'
+      parse_mode: 'HTML'
     });
 
-    console.log("✅ Done! Top 10 posted.");
+    if (!response.data.ok) {
+      throw new Error(`Telegram error: ${JSON.stringify(response.data)}`);
+    }
+
+    console.log("Done! Top 10 posted.");
 
   } catch (err) {
-    console.error("❌ Error:", err.message || err);
+    if (err.response) {
+      console.error("API Error:", JSON.stringify(err.response.data));
+    }
+    console.error("Error:", err.message || err);
     process.exit(1);
   }
 }
