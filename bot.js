@@ -6,7 +6,7 @@ const TG_CHAT_ID = process.env.TG_CHAT_ID;
 const MINT_ADDRESS = process.env.MINT_ADDRESS;
 const DECIMALS = parseInt(process.env.DECIMALS) || 9;
 
-const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
 
 async function postTopHolders() {
   if (!TG_BOT_TOKEN || !TG_CHAT_ID || !MINT_ADDRESS) {
