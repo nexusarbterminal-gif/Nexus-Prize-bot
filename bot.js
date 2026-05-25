@@ -4,26 +4,28 @@ const axios = require('axios');
 const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
 const TG_CHAT_ID = process.env.TG_CHAT_ID;
 const MINT_ADDRESS = process.env.MINT_ADDRESS;
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const DECIMALS = parseInt(process.env.DECIMALS) || 9;
 
-const RPC_ENDPOINTS = [
-  "https://solana-rpc.publicnode.com",
-  "https://api.mainnet-beta.solana.com",
-  "https://rpc.extrnode.com",
-];
+function getConnection() {
+  if (HELIUS_API_KEY) {
+    return new Connection(`https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`, "confirmed");
+  }
+  return new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+}
 
-async function getWorkingConnection() {
-  for (const endpoint of RPC_ENDPOINTS) {
+async function getLargestAccountsWithRetry(connection, mintPubKey, retries = 5) {
+  for (let i = 0; i < retries; i++) {
     try {
-      const conn = new Connection(endpoint, "confirmed");
-      await conn.getLatestBlockhash();
-      console.log(`Using RPC: ${endpoint}`);
-      return conn;
-    } catch {
-      console.log(`RPC failed, trying next: ${endpoint}`);
+      const result = await connection.getTokenLargestAccounts(mintPubKey);
+      return result;
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      const delay = Math.pow(2, i) * 2000;
+      console.log(`Retry ${i + 1}/${retries} after ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
     }
   }
-  throw new Error("All RPC endpoints failed.");
 }
 
 async function postTopHolders() {
@@ -35,9 +37,9 @@ async function postTopHolders() {
   try {
     console.log(`Fetching top holders for: ${MINT_ADDRESS}`);
 
-    const connection = await getWorkingConnection();
+    const connection = getConnection();
     const mintPubKey = new PublicKey(MINT_ADDRESS);
-    const largestAccounts = await connection.getTokenLargestAccounts(mintPubKey);
+    const largestAccounts = await getLargestAccountsWithRetry(connection, mintPubKey);
 
     if (!largestAccounts?.value || largestAccounts.value.length === 0) {
       throw new Error("No token accounts found for this mint address.");
