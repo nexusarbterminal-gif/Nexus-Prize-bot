@@ -1,0 +1,35 @@
+name: Contest Control
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Start or stop the contest'
+        required: true
+        type: choice
+        options:
+          - start
+          - stop
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update contest state
+        run: |
+          if [ "${{ github.event.inputs.action }}" = "start" ]; then
+            echo '{"active": true}' > contest.json
+          else
+            echo '{"active": false}' > contest.json
+          fi
+
+      - name: Commit state
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add contest.json
+          git commit -m "contest: ${{ github.event.inputs.action }}"
+          git push
