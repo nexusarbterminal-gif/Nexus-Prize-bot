@@ -6,6 +6,7 @@ const TG_CHAT_ID = process.env.TG_CHAT_ID;
 const MINT_ADDRESS = process.env.MINT_ADDRESS;
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const DECIMALS = parseInt(process.env.DECIMALS) || 9;
+const EXCLUDED = (process.env.EXCLUDED_ADDRESSES || '').split(',').map(a => a.trim()).filter(Boolean);
 
 function getConnection() {
   if (HELIUS_API_KEY) {
@@ -45,10 +46,13 @@ async function postTopHolders() {
       throw new Error("No token accounts found for this mint address.");
     }
 
-    const top10 = largestAccounts.value.slice(0, 10).map(acc => ({
-      address: acc.address.toBase58(),
-      amount: acc.uiAmount || (Number(acc.amount) / Math.pow(10, DECIMALS))
-    }));
+    const top10 = largestAccounts.value
+      .map(acc => ({
+        address: acc.address.toBase58(),
+        amount: acc.uiAmount || (Number(acc.amount) / Math.pow(10, DECIMALS))
+      }))
+      .filter(acc => acc.amount > 0 && !EXCLUDED.includes(acc.address))
+      .slice(0, 10);
 
     const medals = ['🥇', '🥈', '🥉'];
     const holderLines = top10.map((h, i) => {
